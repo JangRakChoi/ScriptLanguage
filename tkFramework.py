@@ -13,7 +13,7 @@ class framework:
         self.mainFrame=Frame(window)
         self.resultFrame=Frame(window)
         self.mainFrame.pack()
-
+        ######
 
         self.frame = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
 
