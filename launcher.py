@@ -1,0 +1,3 @@
+import tkFramework
+
+tkFramework.framework()
