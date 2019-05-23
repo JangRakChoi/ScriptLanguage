@@ -13,7 +13,6 @@ class framework:
         self.mainFrame=Frame(window)
         self.resultFrame=Frame(window)
         self.mainFrame.pack()
-        ######
 
         self.frame = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
 
@@ -37,7 +36,6 @@ class framework:
 
     def InitSelectLabel(self):
         tmpFont = font.Font(self.mainFrame, size=12, weight='bold', family='Consolas')
-
 
         for i in range(3):
             self.frame[i].pack(side=LEFT)
