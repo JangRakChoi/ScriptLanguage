@@ -1,5 +1,7 @@
 from tkinter import*
 from tkinter import font
+#from mainFrame import*
+#from resultFrame import*
 from tkinter import ttk
 
 CITY=0
@@ -9,9 +11,8 @@ TOWN=2
 
 class framework:
     def __init__(self):
-        window = Tk()
-        self.mainFrame=Frame(window)
-        self.resultFrame=Frame(window)
+        self.window = Tk()
+        self.mainFrame=Frame(self.window)
         self.mainFrame.pack()
 
         self.frame = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
@@ -26,8 +27,7 @@ class framework:
         #시군구 리스트박스
         self.InitListBox()
 
-        window.mainloop()
-
+        self.window.mainloop()
 
     def InitTitleLabel(self):
         tmpFont = font.Font(self.mainFrame, size=20, weight='bold', family='Consolas')
@@ -49,14 +49,14 @@ class framework:
 
         self.selectFrame = Frame(self.mainFrame)
         self.selectFrame.pack(side=BOTTOM)
-        self.searchButton = Button(self.selectFrame, font=tmpFont, text="검색", command=self.show)
+        self.searchButton = Button(self.selectFrame, font=tmpFont, text="검색", command=self.ShowResult)
         self.quitButton = Button(self.selectFrame, font=tmpFont, text="종료")
 
         self.searchButton.pack()
         self.quitButton.pack()
 
     def InitListBox(self):
-        self.scrollbar = [Scrollbar(self.mainFrame,self.frame[i]) for i in range(3)]
+        self.scrollbar = [Scrollbar(self.frame[i]) for i in range(3)]
         self.listbox = [Listbox(self.frame[i], yscrollcommand=self.scrollbar[i].set) for i in range(3)]
 
         for i in range(3):
@@ -74,13 +74,15 @@ class framework:
     def select(self):
         pass
 
-    def show(self):
+    def ShowResult(self):
+        self.mainFrame.destroy()
+        self.resultFrame=Frame(self.window)
         self.resultFrame.tkraise()
         self.resultFrame.pack()
         # 이미지 연습중
         # photo=PhotoImage(file="osm.html")
 
-        self.frame = [Frame(), Frame(), Frame(), Frame(), Frame()]
+        self.frame = [Frame(self.resultFrame), Frame(self.resultFrame), Frame(self.resultFrame), Frame(self.resultFrame), Frame(self.resultFrame)]
         # 지도
         self.frame[0].grid(row=0, column=0)
         # 주소지
