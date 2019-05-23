@@ -1,22 +1,35 @@
 from tkinter import*
 from tkinter import font
-#from mainFrame import*
-#from resultFrame import*
-from tkinter import ttk
+import urllib
+import http.client
+from xml.dom.minidom import parse, parseString
+from xml.etree import ElementTree
 
 CITY=0
 DISTRICT=1
 TOWN=2
 
-
 class framework:
     def __init__(self):
-        self.window = Tk()
-        self.mainFrame=Frame(self.window)
+        self.conn = http.client.HTTPConnection("apis.data.go.kr")
+        self.conn.request("GET", "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=1&numOfRows=10&type=xml&flag=Y")
+        self.req = self.conn.getresponse()
+
+        tree = ElementTree.fromstring(self.req.read())
+        rowElements = tree.getiterator("row")
+
+        self.cityName = []
+
+        for item in rowElements:
+            ctprvn_nm = item.find("ctprvn_nm")
+            self.cityName.append(ctprvn_nm.text)
+
+        window = Tk()
+        self.mainFrame=Frame(window)
+        self.resultFrame=Frame(window)
         self.mainFrame.pack()
-
+        ######
         self.frame = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
-
 
         # title = 지진 대피소 조회
         self.InitTitleLabel()
@@ -27,7 +40,7 @@ class framework:
         #시군구 리스트박스
         self.InitListBox()
 
-        self.window.mainloop()
+        window.mainloop()
 
     def InitTitleLabel(self):
         tmpFont = font.Font(self.mainFrame, size=20, weight='bold', family='Consolas')
@@ -36,6 +49,7 @@ class framework:
 
     def InitSelectLabel(self):
         tmpFont = font.Font(self.mainFrame, size=12, weight='bold', family='Consolas')
+
 
         for i in range(3):
             self.frame[i].pack(side=LEFT)
@@ -49,7 +63,7 @@ class framework:
 
         self.selectFrame = Frame(self.mainFrame)
         self.selectFrame.pack(side=BOTTOM)
-        self.searchButton = Button(self.selectFrame, font=tmpFont, text="검색", command=self.ShowResult)
+        self.searchButton = Button(self.selectFrame, font=tmpFont, text="검색", command=self.show)
         self.quitButton = Button(self.selectFrame, font=tmpFont, text="종료")
 
         self.searchButton.pack()
@@ -66,23 +80,20 @@ class framework:
             self.label[i].pack()
 
         for i in range(20):
-            self.listbox[CITY].insert(i, "시/도" + str(i))
+            self.listbox[CITY].insert(i, self.cityName)
             self.listbox[DISTRICT].insert(i, "시/군/구" + str(i))
             self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
-
 
     def select(self):
         pass
 
-    def ShowResult(self):
-        self.mainFrame.destroy()
-        self.resultFrame=Frame(self.window)
+    def show(self):
         self.resultFrame.tkraise()
         self.resultFrame.pack()
         # 이미지 연습중
         # photo=PhotoImage(file="osm.html")
 
-        self.frame = [Frame(self.resultFrame), Frame(self.resultFrame), Frame(self.resultFrame), Frame(self.resultFrame), Frame(self.resultFrame)]
+        self.frame = [Frame(), Frame(), Frame(), Frame(), Frame()]
         # 지도
         self.frame[0].grid(row=0, column=0)
         # 주소지
