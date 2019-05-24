@@ -80,7 +80,7 @@ class framework:
             self.label[i].pack()
 
         for i in range(20):
-            self.listbox[CITY].insert(i, self.cityName)
+            self.listbox[CITY].insert(i, self.cityName[i])
             self.listbox[DISTRICT].insert(i, "시/군/구" + str(i))
             self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
 

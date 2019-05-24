@@ -102,3 +102,7 @@ class Frame():
         self.gmailButton.pack()
         self.backButton.pack()
         self.quitButton.pack()
+
+    def Check(self):
+        pass
+    
