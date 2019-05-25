@@ -118,7 +118,7 @@ class framework:
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
         cityName = self.entry[CITY].get()
-        self.cityNameList = []
+        self.itemList=[]
 
         for s in range(10):
             s = str(s)
@@ -132,16 +132,17 @@ class framework:
 
             for item in rowElements:
                 if cityName == item.find("ctprvn_nm").text:
-                    self.cityNameList.append(item.find("vt_acmdfclty_nm").text)
+                    self.itemList.append(item)
 
         self.PrintShelters()
 
     def PrintShelters(self):
-        self.label.append(Label(self.window,text=str(len(self.cityNameList))+"곳 찾음"))
+        self.label.append(Label(self.window,text=str(len(self.itemList))+"곳 찾음"))
         self.label[-1].pack()
         self.label[-1].place(x=10,y=130)
-        for i in range(len(self.cityNameList)):
-            self.shelterList.insert(i, self.cityNameList[i])
+        self.mainFrame.append(self.label[-1])
+        for i in range(len(self.itemList)):
+            self.shelterList.insert(i, self.itemList[i].find("vt_acmdfclty_nm").text)
 
 
     def FindLocation(self):
@@ -150,13 +151,13 @@ class framework:
         # 이미지 연습중
         photo=PhotoImage(file="우주소녀.gif")
 
-        print(self.shelterList.curselection())
+        address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
 
         for i in self.mainFrame:
             i.destroy()
 
-        self.label=[Label(self.window,image=photo),
-                    Label(self.window,text="여기\n대피소 주소\n들어간다"),
+        self.label=[Label(self.window,text="Im here",image=photo),
+                    Label(self.window,text=address),
                     Label(self.window,text="여기\n대피 요령\n들어간다")]
 
         self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
@@ -175,17 +176,6 @@ class framework:
         self.gmailButton.place(x=300,y=400)
         self.bookmarkButton.place(x=300,y=425)
         self.backButton.place(x=300,y=450)
-
-
-
-
-
-
-       #for i in self.label:
-       #    i.pack()
-       #self.gmailButton.pack()
-       #self.backButton.pack()
-       #self.quitButton.pack()
 
 
 
