@@ -24,6 +24,13 @@ class framework:
             ctprvn_nm = item.find("ctprvn_nm")
             self.cityName.append(ctprvn_nm.text)
 
+        k = 0
+        for j in self.cityName:
+            print(j)
+            k += 1
+            if k > 500:
+                break
+
         window = Tk()
         self.mainFrame=Frame(window)
         self.resultFrame=Frame(window)
@@ -79,10 +86,14 @@ class framework:
             self.listbox[i].pack()
             self.label[i].pack()
 
-        for i in range(20):
-            self.listbox[CITY].insert(i, self.cityName)
-            self.listbox[DISTRICT].insert(i, "시/군/구" + str(i))
-            self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
+        #for i in self.cityName:
+        #    if i not in self.listbox[CITY]:
+        #        self.listbox[CITY].insert(0, i)
+
+        #for i in range(20):
+        #    self.listbox[CITY].insert(i, self.cityName)
+        #    self.listbox[DISTRICT].insert(i, "시/군/구" + str(i))
+        #    self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
 
     def select(self):
         pass

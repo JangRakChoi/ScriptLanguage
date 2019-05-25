@@ -1,4 +1,4 @@
-from Framework import*
+from realLauncher import*
 import resultFrame
 from tkinter import*
 from tkinter import font
@@ -9,10 +9,10 @@ TOWN=2
 
 class Frame():
     def __init__(self):
-        self.mainFrame = Frame(Framework.window)
+        self.mainFrame = Frame(Window.window)
         self.mainFrame.pack()
 
-        self.frame = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
+        self.subframe = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
 
         # title = 지진 대피소 조회
         self.InitTitleLabel()
@@ -33,11 +33,11 @@ class Frame():
         tmpFont = font.Font(self.mainFrame, size=12, weight='bold', family='Consolas')
 
         for i in range(3):
-            self.frame[i].pack(side=LEFT)
+            self.subframe[i].pack(side=LEFT)
 
-        self.label = [Label(self.frame[CITY],font=tmpFont,text="시/도"),
-                        Label(self.frame[DISTRICT],font=tmpFont, text="시/군/구"),
-                        Label(self.frame[TOWN], font=tmpFont,text="읍/면/리")]
+        self.label = [Label(self.subframe[CITY],font=tmpFont,text="시/도"),
+                        Label(self.subframe[DISTRICT],font=tmpFont, text="시/군/구"),
+                        Label(self.subframe[TOWN], font=tmpFont,text="읍/면/리")]
 
     def InitCommandButton(self):
         tmpFont = font.Font(self.mainFrame, size=10, weight='bold', family='Consolas')
