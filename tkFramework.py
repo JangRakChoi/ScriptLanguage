@@ -134,7 +134,6 @@ class framework:
             self.shelterList.insert(i, i)
 
 
-
     def FindLocation(self):
         print(self.shelterList.curselection())
 
