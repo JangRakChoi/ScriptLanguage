@@ -82,15 +82,6 @@ class framework:
         self.entry[DISTRICT].place(x=110, y=70)
         self.entry[TOWN].place(x=220, y=70)
 
-        #for i in self.cityName:
-        #    if i not in self.listbox[CITY]:
-        #        self.listbox[CITY].insert(0, i)
-
-        #for i in range(20):
-        #    self.listbox[CITY].insert(i, self.cityName)
-        #    self.listbox[DISTRICT].insert(i, "시/군/구" + str(i))
-        #    self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
-
     def InitCommandButton(self):
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
 
@@ -126,11 +117,32 @@ class framework:
 
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
-        for i in range(60):
-            self.shelterList.insert(i, i)
+        cityName = self.entry[CITY].get()
+        self.cityNameList = []
+
+        for s in range(10):
+            s = str(s)
+            conn = http.client.HTTPConnection("apis.data.go.kr")
+            conn.request("GET",
+                         "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
+            req = conn.getresponse()
+
+            tree = ElementTree.fromstring(req.read())
+            rowElements = tree.getiterator("row")
+
+            for item in rowElements:
+                if cityName == item.find("ctprvn_nm").text:
+                    self.cityNameList.append(item.find("vt_acmdfclty_nm").text)
+
+        self.PrintShelters()
+
+    def PrintShelters(self):
+        for i in range(len(self.cityNameList)):
+            self.shelterList.insert(i, self.cityNameList[i])
 
 
     def FindLocation(self):
+
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
         # 이미지 연습중
         photo=PhotoImage(file="우주소녀.gif")
