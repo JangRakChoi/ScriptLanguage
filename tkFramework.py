@@ -49,10 +49,7 @@ class framework:
         #대피소 리스트
         self.InitShelterList()
 
-
-
         self.window.mainloop()
-
 
     def InitTitleLabel(self):
         tmpFont = font.Font(self.window, size=20, weight='bold', family='Consolas')
@@ -62,7 +59,6 @@ class framework:
 
     def InitSearchLabel(self):
         tmpFont = font.Font(self.window, size=12, weight='bold', family='Consolas')
-
 
         self.label = [Label(self.window,font=tmpFont,text="시/도"),
                         Label(self.window,font=tmpFont, text="시/군/구"),
@@ -135,26 +131,40 @@ class framework:
 
 
     def FindLocation(self):
+        tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
+        # 이미지 연습중
+        photo=PhotoImage(file="우주소녀.gif")
+
         print(self.shelterList.curselection())
 
         for i in self.mainFrame:
             i.destroy()
 
-        self.label=[Label(self.window,text="여기\n사진이\n들어간다"),
+        self.label=[Label(self.window,image=photo),
                     Label(self.window,text="여기\n대피소 주소\n들어간다"),
                     Label(self.window,text="여기\n대피 요령\n들어간다")]
-        # 이미지 연습중
-        # photo=PhotoImage(file="osm.html")
 
-       #self.label = []
-       ## self.label.append(Label(self.frame[0],text="여기에\n 사진이 \n 들어간다"))
-       #self.label.append(Label(self.subFrame[0], text="사진 들어감"))
-       #self.label.append(Label(self.subFrame[1], text="지진\n 대피소 \n 주소"))
-       #self.label.append(Label(self.subFrame[2], text="지진\n 대피 \n 요령"))
+        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
+        self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont)
+        self.backButton=Button(self.window,text="뒤로가기",font=tmpFont)
 
-       #self.gmailButton = Button(self.subFrame[3], text="Gmail")
-       #self.backButton = Button(self.subFrame[3], text="뒤로가기")
-       #self.bookmarkButton = Button(self.subFrame[4], text="종료")
+        for i in self.label:
+            i.pack()
+        self.gmailButton.pack()
+        self.bookmarkButton.pack()
+        self.backButton.pack()
+
+        self.label[0].place(x=0,y=200)
+        self.label[1].place(x=0,y=500)
+        self.label[2].place(x=200,y=200)
+        self.gmailButton.place(x=300,y=400)
+        self.bookmarkButton.place(x=300,y=425)
+        self.backButton.place(x=300,y=450)
+
+
+
+
+
 
        #for i in self.label:
        #    i.pack()
