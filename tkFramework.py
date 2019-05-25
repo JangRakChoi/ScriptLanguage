@@ -86,19 +86,15 @@ class framework:
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
 
         self.searchButton = Button(self.window, font=tmpFont, text="검    색", command=self.SearchShelters)
-        self.bookmarkButton = Button(self.window, font=tmpFont, text="즐겨찾기")
         self.searchButton.pack()
-        self.bookmarkButton.pack()
         self.searchButton.place(x=330,y=70)
-        self.bookmarkButton.place(x=330,y=100)
 
         self.mainFrame.append(self.searchButton)
-        self.mainFrame.append(self.bookmarkButton)
 
     def InitShelterList(self):
         frame=Frame(self.window)
         frame.pack()
-        frame.place(x=10,y=150)
+        frame.place(x=10,y=130)
         self.sheltersScrollbar = Scrollbar(frame)
         self.shelterList=Listbox(frame,width=50,height=25,
                                  yscrollcommand=self.sheltersScrollbar.set)
@@ -107,12 +103,17 @@ class framework:
         self.sheltersScrollbar.config(command=self.shelterList.yview)
 
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
+        self.bookmarkButton = Button(self.window, font=tmpFont, text="즐겨찾기")
         self.selectButton=Button(self.window,font=tmpFont,text="선택완료",command=self.FindLocation)
+        self.bookmarkButton.pack()
         self.selectButton.pack()
+        self.bookmarkButton.place(x=250,y=550)
         self.selectButton.place(x=315,y=550)
+
 
         self.mainFrame.append(self.shelterList)
         self.mainFrame.append(self.sheltersScrollbar)
+        self.mainFrame.append(self.bookmarkButton)
         self.mainFrame.append(self.selectButton)
 
     def SearchShelters(self):
@@ -182,11 +183,3 @@ class framework:
         self.gmailButton.place(x=310,y=450)
         self.bookmarkButton.place(x=310,y=480)
         self.backButton.place(x=310,y=510)
-
-
-        #"(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
-        #"(2) 가스와 전깃불을 차단하고 문을 열어 출구를 확보합니다\n"
-        #"(3) 집에서 나갈 때는 발을 보호할 수 있는 신발을 신고 이동합니다\n"
-        #"(4) 계단을 이용하여 밖으로 대피합니다\n"
-        #"(5) 건물 담장과 떨어져 이동합니다\n"
-        #"(6) 넓은 공간으로 대피합니다\n"
