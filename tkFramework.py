@@ -34,6 +34,10 @@ class framework:
         self.window = Tk()
         self.window.geometry("400x600+750+200")
 
+        #프레임별로 요소들을 한번에 다룸. ex) destroy()
+        self.mainFrame=[]
+        self.resultFrame=[]
+
         # title = 지진 대피소 조회
         self.InitTitleLabel()
         # frame3개
@@ -45,9 +49,7 @@ class framework:
         #대피소 리스트
         self.InitShelterList()
 
-        #프레임별로 요소들을 한번에 다룸. ex) destroy()
-        self.mainFrame=[]
-        self.resultFrame=[]
+
 
         self.window.mainloop()
 
@@ -78,6 +80,8 @@ class framework:
                         Entry(self.window,width=13)]
         for i in self.entry:
             i.pack()
+            self.mainFrame.append(i)
+
         self.entry[CITY].place(x=0, y=70)
         self.entry[DISTRICT].place(x=110, y=70)
         self.entry[TOWN].place(x=220, y=70)
@@ -95,11 +99,14 @@ class framework:
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
 
         self.searchButton = Button(self.window, font=tmpFont, text="검    색", command=self.SearchShelters)
-        self.quitButton = Button(self.window, font=tmpFont, text="즐겨찾기")
+        self.bookmarkButton = Button(self.window, font=tmpFont, text="즐겨찾기")
         self.searchButton.pack()
-        self.quitButton.pack()
+        self.bookmarkButton.pack()
         self.searchButton.place(x=330,y=70)
-        self.quitButton.place(x=330,y=100)
+        self.bookmarkButton.place(x=330,y=100)
+
+        self.mainFrame.append(self.searchButton)
+        self.mainFrame.append(self.bookmarkButton)
 
     def InitShelterList(self):
         frame=Frame(self.window)
@@ -117,7 +124,12 @@ class framework:
         self.selectButton.pack()
         self.selectButton.place(x=315,y=550)
 
+        self.mainFrame.append(self.shelterList)
+        self.mainFrame.append(self.sheltersScrollbar)
+        self.mainFrame.append(self.selectButton)
+
     def SearchShelters(self):
+        #검색해서 찾은 것들을 리스트 박스에 넣는다
         for i in range(60):
             self.shelterList.insert(i, i)
 
@@ -126,11 +138,12 @@ class framework:
     def FindLocation(self):
         print(self.shelterList.curselection())
 
-        for i in range(3):
-            self.entry[i].destroy()
-            self.label[i].destroy()
+        for i in self.mainFrame:
+            i.destroy()
 
-
+        self.label=[Label(self.window,text="여기\n사진이\n들어간다"),
+                    Label(self.window,text="여기\n대피소 주소\n들어간다"),
+                    Label(self.window,text="여기\n대피 요령\n들어간다")]
         # 이미지 연습중
         # photo=PhotoImage(file="osm.html")
 
@@ -142,7 +155,7 @@ class framework:
 
        #self.gmailButton = Button(self.subFrame[3], text="Gmail")
        #self.backButton = Button(self.subFrame[3], text="뒤로가기")
-       #self.quitButton = Button(self.subFrame[4], text="종료")
+       #self.bookmarkButton = Button(self.subFrame[4], text="종료")
 
        #for i in self.label:
        #    i.pack()
