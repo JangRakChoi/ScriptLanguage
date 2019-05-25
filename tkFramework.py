@@ -130,6 +130,7 @@ class framework:
             tree = ElementTree.fromstring(req.read())
             rowElements = tree.getiterator("row")
 
+            #self.itemList=[]
             for item in rowElements:
                 if cityName == item.find("ctprvn_nm").text:
                     self.itemList.append(item)
@@ -152,13 +153,18 @@ class framework:
         photo=PhotoImage(file="우주소녀.gif")
 
         address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
-
+        #address="a"
         for i in self.mainFrame:
             i.destroy()
 
-        self.label=[Label(self.window,text="Im here",image=photo),
+        self.label=[Label(self.window,image=photo),
                     Label(self.window,text=address),
-                    Label(self.window,text="여기\n대피 요령\n들어간다")]
+                    Label(self.window,justify="left",
+                          text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
+                                "(2) 가스, 전기를 차단하고 문을 열어 출구를 확보합니다\n"
+                                "(3) 계단을 이용하여 밖으로 대피합니다\n"
+                                "(4) 건물 담장과 떨어져 이동합니다\n"
+                                "(5) 넓은 공간으로 대피합니다\n")]
 
         self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
         self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont)
@@ -171,11 +177,16 @@ class framework:
         self.backButton.pack()
 
         self.label[0].place(x=0,y=200)
-        self.label[1].place(x=0,y=500)
-        self.label[2].place(x=200,y=200)
-        self.gmailButton.place(x=300,y=400)
-        self.bookmarkButton.place(x=300,y=425)
-        self.backButton.place(x=300,y=450)
+        self.label[1].place(x=0,y=400)
+        self.label[2].place(x=0,y=450)
+        self.gmailButton.place(x=310,y=450)
+        self.bookmarkButton.place(x=310,y=480)
+        self.backButton.place(x=310,y=510)
 
 
-
+        #"(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
+        #"(2) 가스와 전깃불을 차단하고 문을 열어 출구를 확보합니다\n"
+        #"(3) 집에서 나갈 때는 발을 보호할 수 있는 신발을 신고 이동합니다\n"
+        #"(4) 계단을 이용하여 밖으로 대피합니다\n"
+        #"(5) 건물 담장과 떨어져 이동합니다\n"
+        #"(6) 넓은 공간으로 대피합니다\n"
