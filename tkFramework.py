@@ -107,8 +107,8 @@ class framework:
         self.sheltersScrollbar.config(command=self.shelterList.yview)
 
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
-        self.bookmarkButton = Button(self.window, font=tmpFont, text="즐겨찾기")
-        self.selectButton=Button(self.window,font=tmpFont,text="선택완료",command=self.FindLocation)
+        self.bookmarkButton = Button(self.window, font=tmpFont, text="즐겨찾기",command=self.ClickBookmarkSearch)
+        self.selectButton=Button(self.window,font=tmpFont,text="선택완료",command=self.ClickSearch)
         self.bookmarkButton.pack()
         self.selectButton.pack()
         self.bookmarkButton.place(x=250,y=550)
@@ -121,7 +121,7 @@ class framework:
         self.mainFrame.append(self.selectButton)
 
     def SetBookmark(self):
-        self.curBookmark = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
+        self.curBookmark = self.address
 
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
@@ -154,6 +154,14 @@ class framework:
         for i in range(len(self.itemList)):
             self.shelterList.insert(i, self.itemList[i].find("vt_acmdfclty_nm").text)
 
+    def ClickSearch(self):
+        self.address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
+
+        self.FindLocation()
+    def ClickBookmarkSearch(self):
+        if self.curBookmark:
+            self.address = self.curBookmark
+            self.FindLocation()
 
     def FindLocation(self):
 
@@ -161,17 +169,13 @@ class framework:
         # 이미지 연습중
         photo=PhotoImage(file="우주소녀.gif")
 
-        if self.curBookmark:
-            address= self.curBookmark
-        else:
-            address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
         #address="a"
         for i in self.mainFrame:
             i.destroy()
         self.mainFrame=[]
 
         self.label=[Label(self.window,image=photo),
-                    Label(self.window,text=address),
+                    Label(self.window,text=self.address),
                     Label(self.window,justify="left",
                           text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
                                 "(2) 가스, 전기를 차단하고 문을 열어 출구를 확보합니다\n"
