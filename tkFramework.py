@@ -37,19 +37,23 @@ class framework:
         #프레임별로 요소들을 한번에 다룸. ex) destroy()
         self.mainFrame=[]
         self.resultFrame=[]
+        self.curBookmark=None
 
+        self.InitMainFrame()
+
+        self.window.mainloop()
+
+    def InitMainFrame(self):
         # title = 지진 대피소 조회
         self.InitTitleLabel()
         # frame3개
         self.InitSearchLabel()
-        #시군구 검색 박스
+        # 시군구 검색 박스
         self.InitSearchEntry()
-        #검색, 종료
+        # 검색, 종료
         self.InitCommandButton()
-        #대피소 리스트
+        # 대피소 리스트
         self.InitShelterList()
-
-        self.window.mainloop()
 
     def InitTitleLabel(self):
         tmpFont = font.Font(self.window, size=20, weight='bold', family='Consolas')
@@ -116,6 +120,9 @@ class framework:
         self.mainFrame.append(self.bookmarkButton)
         self.mainFrame.append(self.selectButton)
 
+    def SetBookmark(self):
+        self.curBookmark = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
+
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
         cityName = self.entry[CITY].get()
@@ -141,8 +148,9 @@ class framework:
     def PrintShelters(self):
         self.label.append(Label(self.window,text=str(len(self.itemList))+"곳 찾음"))
         self.label[-1].pack()
-        self.label[-1].place(x=10,y=130)
+        self.label[-1].place(x=10,y=110)
         self.mainFrame.append(self.label[-1])
+        self.itemList.sort(key=lambda i : i.find("vt_acmdfclty_nm").text)
         for i in range(len(self.itemList)):
             self.shelterList.insert(i, self.itemList[i].find("vt_acmdfclty_nm").text)
 
@@ -153,10 +161,14 @@ class framework:
         # 이미지 연습중
         photo=PhotoImage(file="우주소녀.gif")
 
-        address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
+        if self.curBookmark:
+            address= self.curBookmark
+        else:
+            address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
         #address="a"
         for i in self.mainFrame:
             i.destroy()
+        self.mainFrame=[]
 
         self.label=[Label(self.window,image=photo),
                     Label(self.window,text=address),
@@ -168,8 +180,8 @@ class framework:
                                 "(5) 넓은 공간으로 대피합니다\n")]
 
         self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
-        self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont)
-        self.backButton=Button(self.window,text="뒤로가기",font=tmpFont)
+        self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont,command=self.SetBookmark)
+        self.backButton=Button(self.window,text="뒤로가기",font=tmpFont,command=self.Back)
 
         for i in self.label:
             i.pack()
@@ -183,3 +195,16 @@ class framework:
         self.gmailButton.place(x=310,y=450)
         self.bookmarkButton.place(x=310,y=480)
         self.backButton.place(x=310,y=510)
+
+        for i in self.label:
+            self.resultFrame.append(i)
+        self.resultFrame.append(self.gmailButton)
+        self.resultFrame.append(self.bookmarkButton)
+        self.resultFrame.append(self.backButton)
+
+    def Back(self):
+        for i in self.resultFrame:
+            i.destroy()
+        self.resultFrame=[]
+
+        self.InitMainFrame()
