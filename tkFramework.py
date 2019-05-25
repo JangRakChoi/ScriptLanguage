@@ -137,6 +137,9 @@ class framework:
         self.PrintShelters()
 
     def PrintShelters(self):
+        self.label.append(Label(self.window,text=str(len(self.cityNameList))+"곳 찾음"))
+        self.label[-1].pack()
+        self.label[-1].place(x=10,y=130)
         for i in range(len(self.cityNameList)):
             self.shelterList.insert(i, self.cityNameList[i])
 
