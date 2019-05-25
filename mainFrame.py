@@ -9,10 +9,10 @@ TOWN=2
 
 class Frame():
     def __init__(self):
-        self.mainFrame = Frame(Window.window)
-        self.mainFrame.pack()
+        self.Frame = Frame(Window.window)
+        self.Frame.pack()
 
-        self.subframe = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
+        self.subframe = [Frame(self.Frame), Frame(self.Frame), Frame(self.Frame)]
 
         # title = 지진 대피소 조회
         self.InitTitleLabel()
@@ -25,12 +25,12 @@ class Frame():
 
 
     def InitTitleLabel(self):
-        tmpFont = font.Font(self.mainFrame, size=20, weight='bold', family='Consolas')
-        self.title = Label(self.mainFrame,text="지진 대피소 조회", font=tmpFont)
+        tmpFont = font.Font(self.Frame, size=20, weight='bold', family='Consolas')
+        self.title = Label(self.Frame,text="지진 대피소 조회", font=tmpFont)
         self.title.pack()
 
     def InitSelectLabel(self):
-        tmpFont = font.Font(self.mainFrame, size=12, weight='bold', family='Consolas')
+        tmpFont = font.Font(self.Frame, size=12, weight='bold', family='Consolas')
 
         for i in range(3):
             self.subframe[i].pack(side=LEFT)
@@ -40,9 +40,9 @@ class Frame():
                         Label(self.subframe[TOWN], font=tmpFont,text="읍/면/리")]
 
     def InitCommandButton(self):
-        tmpFont = font.Font(self.mainFrame, size=10, weight='bold', family='Consolas')
+        tmpFont = font.Font(self.Frame, size=10, weight='bold', family='Consolas')
 
-        self.selectFrame = Frame(self.mainFrame)
+        self.selectFrame = Frame(self.Frame)
         self.selectFrame.pack(side=BOTTOM)
         self.searchButton = Button(self.selectFrame, font=tmpFont, text="검색", command=Framework.ShowResult)
         self.quitButton = Button(self.selectFrame, font=tmpFont, text="종료")
@@ -51,8 +51,8 @@ class Frame():
         self.quitButton.pack()
 
     def InitListBox(self):
-        self.scrollbar = [Scrollbar(self.frame[i]) for i in range(3)]
-        self.listbox = [Listbox(self.frame[i], yscrollcommand=self.scrollbar[i].set) for i in range(3)]
+        self.scrollbar = [Scrollbar(self.subframe[i]) for i in range(3)]
+        self.listbox = [Listbox(self.subframe[i], yscrollcommand=self.scrollbar[i].set) for i in range(3)]
 
         for i in range(3):
             self.scrollbar[i]["command"] = self.listbox[i].yview
@@ -66,7 +66,8 @@ class Frame():
             self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
 
     def ShowResult(self):
-        self.mainFrame.destroy()
+        pass
+        self.Frame.destroy()
         resultFrame.Frame()
 
         self.resultFrame=Frame(Framework.rFrame)

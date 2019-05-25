@@ -11,80 +11,76 @@ TOWN=2
 
 class framework:
     def __init__(self):
-        self.conn = http.client.HTTPConnection("apis.data.go.kr")
-        self.conn.request("GET", "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=1&numOfRows=10&type=xml&flag=Y")
-        self.req = self.conn.getresponse()
+        #self.conn = http.client.HTTPConnection("apis.data.go.kr")
+        #self.conn.request("GET", "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=1&numOfRows=10&type=xml&flag=Y")
+        #self.req = self.conn.getresponse()
+#
+        #tree = ElementTree.fromstring(self.req.read())
+        #rowElements = tree.getiterator("row")
+#
+        #self.cityName = []
+#
+        #for item in rowElements:
+        #    ctprvn_nm = item.find("ctprvn_nm")
+        #    self.cityName.append(ctprvn_nm.text)
+#
+        #k = 0
+        #for j in self.cityName:
+        #    print(j)
+        #    k += 1
+        #    if k > 500:
+        #        break
 
-        tree = ElementTree.fromstring(self.req.read())
-        rowElements = tree.getiterator("row")
-
-        self.cityName = []
-
-        for item in rowElements:
-            ctprvn_nm = item.find("ctprvn_nm")
-            self.cityName.append(ctprvn_nm.text)
-
-        k = 0
-        for j in self.cityName:
-            print(j)
-            k += 1
-            if k > 500:
-                break
-
-        window = Tk()
-        self.mainFrame=Frame(window)
-        self.resultFrame=Frame(window)
-        self.mainFrame.pack()
-        ######
-        self.frame = [Frame(self.mainFrame), Frame(self.mainFrame), Frame(self.mainFrame)]
+        self.window = Tk()
+        self.window.geometry("400x600+750+200")
 
         # title = 지진 대피소 조회
         self.InitTitleLabel()
         # frame3개
-        self.InitSelectLabel()
+        self.InitSearchLabel()
+        #시군구 검색 박스
+        self.InitSearchEntry()
         #검색, 종료
         self.InitCommandButton()
-        #시군구 리스트박스
-        self.InitListBox()
+        #대피소 리스트
+        self.InitShelterList()
 
-        window.mainloop()
+        #프레임별로 요소들을 한번에 다룸. ex) destroy()
+        self.mainFrame=[]
+        self.resultFrame=[]
+
+        self.window.mainloop()
+
 
     def InitTitleLabel(self):
-        tmpFont = font.Font(self.mainFrame, size=20, weight='bold', family='Consolas')
-        self.title = Label(self.mainFrame,text="지진 대피소 조회", font=tmpFont)
+        tmpFont = font.Font(self.window, size=20, weight='bold', family='Consolas')
+        self.title = Label(self.window,text="지진 대피소 조회", font=tmpFont)
         self.title.pack()
+        self.title.place(x=20,y=10)
 
-    def InitSelectLabel(self):
-        tmpFont = font.Font(self.mainFrame, size=12, weight='bold', family='Consolas')
+    def InitSearchLabel(self):
+        tmpFont = font.Font(self.window, size=12, weight='bold', family='Consolas')
 
 
-        for i in range(3):
-            self.frame[i].pack(side=LEFT)
+        self.label = [Label(self.window,font=tmpFont,text="시/도"),
+                        Label(self.window,font=tmpFont, text="시/군/구"),
+                        Label(self.window,font=tmpFont,text="읍/면/리")]
+        for i in self.label:
+            i.pack()
+            self.mainFrame.append(i)
+        self.label[CITY].place(x=0+10,y=50)
+        self.label[DISTRICT].place(x=110+10, y=50)
+        self.label[TOWN].place(x=220+10, y=50)
 
-        self.label = [Label(self.frame[CITY],font=tmpFont,text="시/도"),
-                        Label(self.frame[DISTRICT],font=tmpFont, text="시/군/구"),
-                        Label(self.frame[TOWN], font=tmpFont,text="읍/면/리")]
-
-    def InitCommandButton(self):
-        tmpFont = font.Font(self.mainFrame, size=10, weight='bold', family='Consolas')
-
-        self.selectFrame = Frame(self.mainFrame)
-        self.selectFrame.pack(side=BOTTOM)
-        self.searchButton = Button(self.selectFrame, font=tmpFont, text="검색", command=self.show)
-        self.quitButton = Button(self.selectFrame, font=tmpFont, text="종료")
-
-        self.searchButton.pack()
-        self.quitButton.pack()
-
-    def InitListBox(self):
-        self.scrollbar = [Scrollbar(self.frame[i]) for i in range(3)]
-        self.listbox = [Listbox(self.frame[i], yscrollcommand=self.scrollbar[i].set) for i in range(3)]
-
-        for i in range(3):
-            self.scrollbar[i]["command"] = self.listbox[i].yview
-            self.scrollbar[i].pack(side=RIGHT, fill='y')
-            self.listbox[i].pack()
-            self.label[i].pack()
+    def InitSearchEntry(self):
+        self.entry = [Entry(self.window,width=13),
+                        Entry(self.window,width=13),
+                        Entry(self.window,width=13)]
+        for i in self.entry:
+            i.pack()
+        self.entry[CITY].place(x=0, y=70)
+        self.entry[DISTRICT].place(x=110, y=70)
+        self.entry[TOWN].place(x=220, y=70)
 
         #for i in self.cityName:
         #    if i not in self.listbox[CITY]:
@@ -95,39 +91,64 @@ class framework:
         #    self.listbox[DISTRICT].insert(i, "시/군/구" + str(i))
         #    self.listbox[TOWN].insert(i, "읍/면/동" + str(i))
 
-    def select(self):
-        pass
+    def InitCommandButton(self):
+        tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
 
-    def show(self):
-        self.resultFrame.tkraise()
-        self.resultFrame.pack()
+        self.searchButton = Button(self.window, font=tmpFont, text="검    색", command=self.SearchShelters)
+        self.quitButton = Button(self.window, font=tmpFont, text="즐겨찾기")
+        self.searchButton.pack()
+        self.quitButton.pack()
+        self.searchButton.place(x=330,y=70)
+        self.quitButton.place(x=330,y=100)
+
+    def InitShelterList(self):
+        frame=Frame(self.window)
+        frame.pack()
+        frame.place(x=10,y=150)
+        self.sheltersScrollbar = Scrollbar(frame)
+        self.shelterList=Listbox(frame,width=50,height=25,
+                                 yscrollcommand=self.sheltersScrollbar.set)
+        self.shelterList.pack(side="left")
+        self.sheltersScrollbar.pack(side="right", fill="y")
+        self.sheltersScrollbar.config(command=self.shelterList.yview)
+
+        tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
+        self.selectButton=Button(self.window,font=tmpFont,text="선택완료",command=self.FindLocation)
+        self.selectButton.pack()
+        self.selectButton.place(x=315,y=550)
+
+    def SearchShelters(self):
+        for i in range(60):
+            self.shelterList.insert(i, i)
+
+
+
+    def FindLocation(self):
+        print(self.shelterList.curselection())
+
+        for i in range(3):
+            self.entry[i].destroy()
+            self.label[i].destroy()
+
+
         # 이미지 연습중
         # photo=PhotoImage(file="osm.html")
 
-        self.frame = [Frame(), Frame(), Frame(), Frame(), Frame()]
-        # 지도
-        self.frame[0].grid(row=0, column=0)
-        # 주소지
-        self.frame[1].grid(row=1, column=0)
-        # 지진대피요령
-        self.frame[2].grid(row=0, column=1)
-        # Gmail, 뒤로가기
-        self.frame[3].grid(row=0, column=2)
-        # 종료
-        self.frame[4].grid(row=1, column=2)
+       #self.label = []
+       ## self.label.append(Label(self.frame[0],text="여기에\n 사진이 \n 들어간다"))
+       #self.label.append(Label(self.subFrame[0], text="사진 들어감"))
+       #self.label.append(Label(self.subFrame[1], text="지진\n 대피소 \n 주소"))
+       #self.label.append(Label(self.subFrame[2], text="지진\n 대피 \n 요령"))
 
-        self.label = []
-        # self.label.append(Label(self.frame[0],text="여기에\n 사진이 \n 들어간다"))
-        self.label.append(Label(self.frame[0], text="사진 들어감"))
-        self.label.append(Label(self.frame[1], text="지진\n 대피소 \n 주소"))
-        self.label.append(Label(self.frame[2], text="지진\n 대피 \n 요령"))
+       #self.gmailButton = Button(self.subFrame[3], text="Gmail")
+       #self.backButton = Button(self.subFrame[3], text="뒤로가기")
+       #self.quitButton = Button(self.subFrame[4], text="종료")
 
-        self.gmailButton = Button(self.frame[3], text="Gmail")
-        self.backButton = Button(self.frame[3], text="뒤로가기")
-        self.quitButton = Button(self.frame[4], text="종료")
+       #for i in self.label:
+       #    i.pack()
+       #self.gmailButton.pack()
+       #self.backButton.pack()
+       #self.quitButton.pack()
 
-        for i in self.label:
-            i.pack()
-        self.gmailButton.pack()
-        self.backButton.pack()
-        self.quitButton.pack()
+
+

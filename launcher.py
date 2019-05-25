@@ -1,2 +1,2 @@
-import Framework
-Framework.framework()
+import tkFramework
+tkFramework.framework()

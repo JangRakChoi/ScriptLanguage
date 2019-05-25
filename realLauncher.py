@@ -5,13 +5,6 @@ CITY = 0
 DISTRICT = 1
 TOWN = 2
 
-mFrame=None
-rFrame=None
-
-def SetMainFrame():
-    global mFrame
-    mFrame = mainFrame.Frame()
-
 class Window():
     window=Tk()
     window.mainloop()
