@@ -38,6 +38,7 @@ class framework:
         self.mainFrame=[]
         self.resultFrame=[]
         self.curBookmark=None
+        self.rowElements=[]
 
         self.InitMainFrame()
 
@@ -128,20 +129,21 @@ class framework:
         cityName = self.entry[CITY].get()
         self.itemList=[]
 
-        for s in range(10):
-            s = str(s)
-            conn = http.client.HTTPConnection("apis.data.go.kr")
-            conn.request("GET",
-                         "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
-            req = conn.getresponse()
+        if not self.rowElements:
+            for s in range(10):
+                s = str(s)
+                conn = http.client.HTTPConnection("apis.data.go.kr")
+                conn.request("GET",
+                             "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
+                req = conn.getresponse()
 
-            tree = ElementTree.fromstring(req.read())
-            rowElements = tree.getiterator("row")
+                tree = ElementTree.fromstring(req.read())
+                self.rowElements = self.rowElements + list(tree.getiterator("row"))
 
-            #self.itemList=[]
-            for item in rowElements:
-                if cityName == item.find("ctprvn_nm").text:
-                    self.itemList.append(item)
+        #self.itemList=[]
+        for item in self.rowElements:
+            if cityName == item.find("ctprvn_nm").text:
+                self.itemList.append(item)
 
         self.PrintShelters()
 
@@ -164,7 +166,6 @@ class framework:
             self.FindLocation()
 
     def FindLocation(self):
-
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
         # 이미지 연습중
         photo=PhotoImage(file="우주소녀.gif")
