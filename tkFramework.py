@@ -122,7 +122,11 @@ class framework:
         self.mainFrame.append(self.selectButton)
 
     def SetBookmark(self):
-        self.curBookmark = self.address
+        f = open("Bookmark.txt",'w')
+        f.write(self.address)
+        f.close()
+        #self.curBookmark = self.address
+
 
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
@@ -161,6 +165,8 @@ class framework:
 
         self.FindLocation()
     def ClickBookmarkSearch(self):
+        f=open("Bookmark.txt")
+        self.curBookmark=f.read()
         if self.curBookmark:
             self.address = self.curBookmark
             self.FindLocation()
