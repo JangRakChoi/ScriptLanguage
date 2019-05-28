@@ -11,26 +11,6 @@ TOWN=2
 
 class framework:
     def __init__(self):
-        #self.conn = http.client.HTTPConnection("apis.data.go.kr")
-        #self.conn.request("GET", "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=1&numOfRows=10&type=xml&flag=Y")
-        #self.req = self.conn.getresponse()
-#
-        #tree = ElementTree.fromstring(self.req.read())
-        #rowElements = tree.getiterator("row")
-#
-        #self.cityName = []
-#
-        #for item in rowElements:
-        #    ctprvn_nm = item.find("ctprvn_nm")
-        #    self.cityName.append(ctprvn_nm.text)
-#
-        #k = 0
-        #for j in self.cityName:
-        #    print(j)
-        #    k += 1
-        #    if k > 500:
-        #        break
-
         self.window = Tk()
         self.window.geometry("400x600+750+200")
 
