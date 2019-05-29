@@ -1,9 +1,15 @@
+#-*- coding: utf-8 -*-
 from tkinter import*
 from tkinter import font
 import urllib
 import http.client
 from xml.dom.minidom import parse, parseString
 from xml.etree import ElementTree
+import smtplib
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+import mysmtplib
+
 
 CITY=0
 DISTRICT=1
@@ -170,7 +176,7 @@ class framework:
                                 "(4) 건물 담장과 떨어져 이동합니다\n"
                                 "(5) 넓은 공간으로 대피합니다\n")]
 
-        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
+        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont, command=self.SendGmail)
         self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont,command=self.SetBookmark)
         self.backButton=Button(self.window,text="뒤로가기",font=tmpFont,command=self.Back)
 
@@ -199,3 +205,34 @@ class framework:
         self.resultFrame=[]
 
         self.InitMainFrame()
+
+    def SendGmail(self):
+        host="smtp.gmail.com"
+        port="587"
+        htmlFileName="osm.html"
+
+        senderAddr="dswill038@gmail.com"
+        recipientAddr="dswill038@naver.com"
+
+        text=self.label[1]['text']
+        #msg=MIMEText(text)
+        msg=MIMEBase("multipart","alternative")
+
+        msg['Subject']="지진 대피소"
+        msg['From']=senderAddr
+        msg['To']=recipientAddr
+
+        htmlFD=open(htmlFileName,'rb')
+        #HtmlPart=MIMEText(htmlFD.read(),'html',_charset='UTF-8')
+        HtmlPart=MIMEText(text)
+        htmlFD.close()
+
+        msg.attach(HtmlPart)
+
+        s = mysmtplib.MySMTP(host, port)
+        s.ehlo()
+        s.starttls()
+        s.ehlo()
+        s.login("dswill038@gmail.com", "heeseok!23")
+        s.sendmail(senderAddr, [recipientAddr], msg.as_string())
+        s.close()
