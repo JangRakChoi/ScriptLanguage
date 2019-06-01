@@ -18,10 +18,11 @@ class framework:
         #프레임별로 요소들을 한번에 다룸. ex) destroy()
         self.mainFrame=[]
         self.resultFrame=[]
+        self.graphFrame=[]
         self.curBookmark=None
         self.rowElements=[]
 
-        self.InitMainFrame()
+        #self.InitMainFrame()
 
         if not self.rowElements:
             for s in range(10):
@@ -34,11 +35,55 @@ class framework:
                 tree = ElementTree.fromstring(req.read())
                 self.rowElements = self.rowElements + list(tree.getiterator("row"))
 
+        self.InitGraphFrame()
+
         self.window.mainloop()
 
-    def InitMainFrame(self):
-        # title = 지진 대피소 조회
+    def InitGraphFrame(self):
         self.InitTitleLabel()
+        cities=[]
+        cityNames=[]
+
+        for i in self.rowElements:
+            cities.append(i.find("ctprvn_nm").text)
+            if cities[-1] not in cityNames:
+                cityNames.append(i.find("ctprvn_nm").text)
+
+        self.canvas=Canvas(self.window,width=400,height=600)
+        self.canvas.pack()
+        self.canvas.place(x=0,y=50)
+
+        tmpFont = font.Font(self.window, size=8, family='Consolas')
+        histogram=[]
+        for  i in cityNames:
+            histogram.append(cities.count(i))
+
+        maxCount=int(max(histogram))
+        barWidth=25
+
+        for i in range(len(histogram)):
+            if(histogram[i] < 1):
+                histogram[i]=1
+            self.canvas.create_rectangle(0,20+i*5+barWidth*i, 80+(int(self.canvas['width'])-100)*histogram[i]/maxCount,20+i*5+barWidth*(i+1),fill='light green')
+            self.canvas.create_text(50,30+i*5+barWidth*i,text=cityNames[i],font=tmpFont)
+            self.canvas.create_text(90+(int(self.canvas['width'])-100)*histogram[i]/maxCount,30+i*5+barWidth*i,text=histogram[i],font=tmpFont)
+            print(int(self.canvas['width'])*histogram[i]/maxCount)
+
+        tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
+        self.checkButton=Button(self.window, font=tmpFont, text="검    색", command=self.InitMainFrame)
+        self.checkButton.pack()
+        self.checkButton.place(x=330,y=570)
+
+        self.graphFrame.append(self.canvas)
+        self.graphFrame.append(self.checkButton)
+
+    def InitMainFrame(self):
+        for i in self.graphFrame:
+            i.destroy()
+        self.graphFrame=[]
+
+        # title = 지진 대피소 조회
+        #self.InitTitleLabel()
         # frame3개
         self.InitSearchLabel()
         # 시군구 검색 박스
@@ -169,15 +214,15 @@ class framework:
         # 이미지 연습중
 
         #지도
-        map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=16.5)
+        map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=16)
         folium.Marker([float(self.yPos), float(self.xPos)], popup='Mt. Hood Meadows').add_to(map_osm)
         map_osm.save('osm.html')
 
-        driver = webdriver.Chrome("chromedriver.exe")
-        driver.implicitly_wait(3)
-        driver.get("file:///C:/Users/CHS\Desktop/조희석/전공/스크립트언어/Team Project/ScriptLanguage/osm.html")
-        driver.save_screenshot("screenshot.png")
-        driver.close()
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(3)
+        self.driver.get("file:///C:/Users/CHS\Desktop/조희석/전공/스크립트언어/Team Project/ScriptLanguage/osm.html")
+        self.driver.save_screenshot("screenshot.png")
+        #driver.close()
 
         photo=PhotoImage(file="screenshot.png")
 
@@ -222,5 +267,7 @@ class framework:
         for i in self.resultFrame:
             i.destroy()
         self.resultFrame=[]
+
+        self.driver.close()
 
         self.InitMainFrame()
