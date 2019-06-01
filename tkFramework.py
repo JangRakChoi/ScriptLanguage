@@ -1,15 +1,11 @@
-#-*- coding: utf-8 -*-
 from tkinter import*
 from tkinter import font
 import urllib
 import http.client
 from xml.dom.minidom import parse, parseString
 from xml.etree import ElementTree
-import smtplib
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
-import mysmtplib
-
+import folium
+from selenium import webdriver
 
 CITY=0
 DISTRICT=1
@@ -27,6 +23,17 @@ class framework:
         self.rowElements=[]
 
         self.InitMainFrame()
+
+        if not self.rowElements:
+            for s in range(10):
+                s = str(s)
+                conn = http.client.HTTPConnection("apis.data.go.kr")
+                conn.request("GET",
+                             "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
+                req = conn.getresponse()
+
+                tree = ElementTree.fromstring(req.read())
+                self.rowElements = self.rowElements + list(tree.getiterator("row"))
 
         self.window.mainloop()
 
@@ -117,23 +124,16 @@ class framework:
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
         cityName = self.entry[CITY].get()
+        district = self.entry[DISTRICT].get()
+        town = self.entry[TOWN].get()
+
         self.itemList=[]
-
-        if not self.rowElements:
-            for s in range(10):
-                s = str(s)
-                conn = http.client.HTTPConnection("apis.data.go.kr")
-                conn.request("GET",
-                             "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
-                req = conn.getresponse()
-
-                tree = ElementTree.fromstring(req.read())
-                self.rowElements = self.rowElements + list(tree.getiterator("row"))
 
         #self.itemList=[]
         for item in self.rowElements:
             if cityName == item.find("ctprvn_nm").text:
-                self.itemList.append(item)
+                if district == item.find("sgg_nm").text:
+                    self.itemList.append(item)
 
         self.PrintShelters()
 
@@ -143,13 +143,19 @@ class framework:
         self.label[-1].place(x=10,y=110)
         self.mainFrame.append(self.label[-1])
         self.itemList.sort(key=lambda i : i.find("vt_acmdfclty_nm").text)
+
         for i in range(len(self.itemList)):
-            self.shelterList.insert(i, self.itemList[i].find("vt_acmdfclty_nm").text)
+            self.shelterList.insert(i, self.itemList[i].find("dtl_adres").text + '  ' + self.itemList[i].find("vt_acmdfclty_nm").text)
+
 
     def ClickSearch(self):
         self.address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
+        # 위도경도
+        self.xPos = self.itemList[self.shelterList.curselection()[0]].find("xcord").text
+        self.yPos = self.itemList[self.shelterList.curselection()[0]].find("ycord").text
 
         self.FindLocation()
+
     def ClickBookmarkSearch(self):
         f=open("Bookmark.txt")
         self.curBookmark=f.read()
@@ -160,14 +166,26 @@ class framework:
     def FindLocation(self):
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
         # 이미지 연습중
-        photo=PhotoImage(file="우주소녀.gif")
+
+        #지도
+        map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=20)
+        folium.Marker([float(self.yPos), float(self.xPos)], popup='Mt. Hood Meadows').add_to(map_osm)
+        map_osm.save('osm.html')
+
+        driver = webdriver.Chrome("chromedriver.exe")
+        driver.implicitly_wait(3)
+        driver.get("file:///C:/Users/CHS\Desktop/조희석/전공/스크립트언어/Team Project/ScriptLanguage/osm.html")
+        driver.save_screenshot("screenshot.png")
+        driver.close()
+
+        photo=PhotoImage(file="screenshot.png")
 
         #address="a"
         for i in self.mainFrame:
             i.destroy()
         self.mainFrame=[]
 
-        self.label=[Label(self.window,image=photo),
+        self.label=[Label(self.window,image=photo,width=450,height=300),
                     Label(self.window,text=self.address),
                     Label(self.window,justify="left",
                           text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
@@ -176,7 +194,7 @@ class framework:
                                 "(4) 건물 담장과 떨어져 이동합니다\n"
                                 "(5) 넓은 공간으로 대피합니다\n")]
 
-        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont, command=self.SendGmail)
+        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
         self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont,command=self.SetBookmark)
         self.backButton=Button(self.window,text="뒤로가기",font=tmpFont,command=self.Back)
 
@@ -186,7 +204,7 @@ class framework:
         self.bookmarkButton.pack()
         self.backButton.pack()
 
-        self.label[0].place(x=0,y=200)
+        self.label[0].place(x=0,y=100)
         self.label[1].place(x=0,y=400)
         self.label[2].place(x=0,y=450)
         self.gmailButton.place(x=310,y=450)
@@ -205,34 +223,3 @@ class framework:
         self.resultFrame=[]
 
         self.InitMainFrame()
-
-    def SendGmail(self):
-        host="smtp.gmail.com"
-        port="587"
-        htmlFileName="osm.html"
-
-        senderAddr="dswill038@gmail.com"
-        recipientAddr="dswill038@naver.com"
-
-        text=self.label[1]['text']
-        #msg=MIMEText(text)
-        msg=MIMEBase("multipart","alternative")
-
-        msg['Subject']="지진 대피소"
-        msg['From']=senderAddr
-        msg['To']=recipientAddr
-
-        htmlFD=open(htmlFileName,'rb')
-        #HtmlPart=MIMEText(htmlFD.read(),'html',_charset='UTF-8')
-        HtmlPart=MIMEText(text)
-        htmlFD.close()
-
-        msg.attach(HtmlPart)
-
-        s = mysmtplib.MySMTP(host, port)
-        s.ehlo()
-        s.starttls()
-        s.ehlo()
-        s.login("dswill038@gmail.com", "heeseok!23")
-        s.sendmail(senderAddr, [recipientAddr], msg.as_string())
-        s.close()
