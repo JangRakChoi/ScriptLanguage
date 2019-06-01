@@ -9,7 +9,6 @@ from selenium import webdriver
 
 CITY=0
 DISTRICT=1
-TOWN=2
 
 class framework:
     def __init__(self):
@@ -59,33 +58,29 @@ class framework:
         tmpFont = font.Font(self.window, size=12, weight='bold', family='Consolas')
 
         self.label = [Label(self.window,font=tmpFont,text="시/도"),
-                        Label(self.window,font=tmpFont, text="시/군/구"),
-                        Label(self.window,font=tmpFont,text="읍/면/리")]
+                        Label(self.window,font=tmpFont, text="시/군/구")]
         for i in self.label:
             i.pack()
             self.mainFrame.append(i)
-        self.label[CITY].place(x=0+10,y=50)
-        self.label[DISTRICT].place(x=110+10, y=50)
-        self.label[TOWN].place(x=220+10, y=50)
+        self.label[CITY].place(x=40,y=50)
+        self.label[DISTRICT].place(x=180, y=50)
 
     def InitSearchEntry(self):
-        self.entry = [Entry(self.window,width=13),
-                        Entry(self.window,width=13),
-                        Entry(self.window,width=13)]
+        self.entry = [Entry(self.window,width=16),
+                        Entry(self.window,width=16)]
         for i in self.entry:
             i.pack()
             self.mainFrame.append(i)
 
-        self.entry[CITY].place(x=0, y=70)
-        self.entry[DISTRICT].place(x=110, y=70)
-        self.entry[TOWN].place(x=220, y=70)
+        self.entry[CITY].place(x=20, y=70)
+        self.entry[DISTRICT].place(x=160, y=70)
 
     def InitCommandButton(self):
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
 
         self.searchButton = Button(self.window, font=tmpFont, text="검    색", command=self.SearchShelters)
         self.searchButton.pack()
-        self.searchButton.place(x=330,y=70)
+        self.searchButton.place(x=300,y=65)
 
         self.mainFrame.append(self.searchButton)
 
@@ -118,21 +113,26 @@ class framework:
         f = open("Bookmark.txt",'w')
         f.write(self.address)
         f.close()
-        #self.curBookmark = self.address
 
 
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
         cityName = self.entry[CITY].get()
-        district = self.entry[DISTRICT].get()
-        town = self.entry[TOWN].get()
+        districtName = self.entry[DISTRICT].get()
 
+        if len(self.label)==3:
+            self.shelterList.delete(0,len(self.itemList))
         self.itemList=[]
 
-        #self.itemList=[]
         for item in self.rowElements:
-            if cityName == item.find("ctprvn_nm").text:
-                if district == item.find("sgg_nm").text:
+            if districtName == '':
+                if cityName == item.find("ctprvn_nm").text:
+                    self.itemList.append(item)
+            elif cityName=='':
+                if districtName == item.find("sgg_nm").text:
+                    self.itemList.append(item)
+            elif cityName == item.find("ctprvn_nm").text:
+                if districtName == item.find("sgg_nm").text:
                     self.itemList.append(item)
 
         self.PrintShelters()
@@ -149,7 +149,8 @@ class framework:
 
 
     def ClickSearch(self):
-        self.address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text
+        self.address = self.itemList[self.shelterList.curselection()[0]].find("dtl_adres").text + ' ' +\
+                       self.itemList[self.shelterList.curselection()[0]].find("vt_acmdfclty_nm").text
         # 위도경도
         self.xPos = self.itemList[self.shelterList.curselection()[0]].find("xcord").text
         self.yPos = self.itemList[self.shelterList.curselection()[0]].find("ycord").text
@@ -168,7 +169,7 @@ class framework:
         # 이미지 연습중
 
         #지도
-        map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=20)
+        map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=16.5)
         folium.Marker([float(self.yPos), float(self.xPos)], popup='Mt. Hood Meadows').add_to(map_osm)
         map_osm.save('osm.html')
 
@@ -185,7 +186,7 @@ class framework:
             i.destroy()
         self.mainFrame=[]
 
-        self.label=[Label(self.window,image=photo,width=450,height=300),
+        self.label=[Label(self.window,image=photo,width=450,height=350),
                     Label(self.window,text=self.address),
                     Label(self.window,justify="left",
                           text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
@@ -204,7 +205,7 @@ class framework:
         self.bookmarkButton.pack()
         self.backButton.pack()
 
-        self.label[0].place(x=0,y=100)
+        self.label[0].place(x=0,y=50)
         self.label[1].place(x=0,y=400)
         self.label[2].place(x=0,y=450)
         self.gmailButton.place(x=310,y=450)
