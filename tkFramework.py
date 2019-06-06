@@ -6,14 +6,179 @@ from xml.dom.minidom import parse, parseString
 from xml.etree import ElementTree
 import folium
 from selenium import webdriver
+import mysmtplib
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+
+
+import sys
+import time
+import sqlite3
+import telepot
+from pprint import pprint
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import re
+from datetime import date, datetime, timedelta
+import traceback
+
+import launcher
 
 CITY=0
 DISTRICT=1
+
+TOKEN = '886975265:AAGNwVYRGIShdu4tf95OwRp6HHbwaMskYy4'
+MAX_MSG_LENGTH = 300
+bot = telepot.Bot(TOKEN)
+
+class Noti:
+    def __init__(self):
+        pass
+
+    def getData(self,command_param=None, subCommand_param=None):
+        elements = launcher.launch.rowElements
+        res_list = []
+        for i in elements:
+            if i.find("ctprvn_nm").text == command_param and i.find("sgg_nm").text == subCommand_param:
+                res_list.append(i.find("dtl_adres").text + i.find("mngps_nm").text + i.find("mngps_telno").text + '\n')
+
+        return res_list
+
+    def sendMessage(self,user, msg):
+        try:
+            bot.sendMessage(user, msg)
+        except:
+            traceback.print_exc(file=sys.stdout)
+
+    def run(self):
+        conn = sqlite3.connect('logs.db')
+        cursor = conn.cursor()
+        cursor.execute('CREATE TABLE IF NOT EXISTS logs( user TEXT, log TEXT, PRIMARY KEY(user, log) )')
+        conn.commit()
+
+        user_cursor = sqlite3.connect('users.db').cursor()
+        user_cursor.execute('CREATE TABLE IF NOT EXISTS users( user TEXT, location TEXT, PRIMARY KEY(user, location) )')
+        user_cursor.execute('SELECT * from users')
+
+        for data in user_cursor.fetchall():
+            user, param = data[0], data[1]
+            print(user, param)
+            res_list = self.getData(param)
+            msg = ''
+            for r in res_list:
+                try:
+                    cursor.execute('INSERT INTO logs (user,log) VALUES ("%s", "%s")' % (user, r))
+                except sqlite3.IntegrityError:
+                    # 이미 해당 데이터가 있다는 것을 의미합니다.
+                    pass
+                else:
+                    print(str(datetime.now()).split('.')[0], r)
+                    if len(r + msg) + 1 > MAX_MSG_LENGTH:
+                        self.sendMessage(user, msg)
+                        msg = r + '\n'
+                    else:
+                        msg += r + '\n'
+            if msg:
+                self.sendMessage(user, msg)
+        conn.commit()
+
+class Teller:
+    def __init__(self):
+        pass
+
+    def replyAptData(self,user, command_param, subCommand_param=None):
+        global MAX_MSG_LENGTH
+        print(user, command_param, subCommand_param)
+        res_list = Noti.getData(command_param, subCommand_param)
+        msg = ''
+        for r in res_list:
+            print(str(datetime.now()).split('.')[0], r)
+            if len(r + msg) + 1 > MAX_MSG_LENGTH:
+                Noti.sendMessage(user, msg)
+                msg = r + '\n'
+            else:
+                msg += r + '\n'
+        if msg:
+            Noti.sendMessage(user, msg)
+        else:
+            Noti.sendMessage(user, ' \데이터가 없습니다.')
+
+    def save(self,user, loc_param):
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('CREATE TABLE IF NOT EXISTS users( user TEXT, location TEXT, PRIMARY KEY(user, location) )')
+        try:
+            cursor.execute('INSERT INTO users(user, location) VALUES ("%s", "%s")' % (user, loc_param))
+        except sqlite3.IntegrityError:
+            Noti.sendMessage(user, '이미 해당 정보가 저장되어 있습니다.')
+            return
+        else:
+            Noti.sendMessage(user, '저장되었습니다.')
+            conn.commit()
+
+    def check(self,user):
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('CREATE TABLE IF NOT EXISTS users( user TEXT, location TEXT, PRIMARY KEY(user, location) )')
+        cursor.execute('SELECT * from users WHERE user="%s"' % user)
+        for data in cursor.fetchall():
+            row = 'id:' + str(data[0]) + ', location:' + data[1]
+            Noti.sendMessage(user, row)
+
+    def handle(self,msg):
+        content_type, chat_type, chat_id = telepot.glance(msg)
+        if content_type != 'text':
+            Noti.sendMessage(chat_id, '난 텍스트 이외의 메시지는 처리하지 못해요.')
+            return
+
+        text = msg['text']
+        args = text.split(' ')
+
+        if text.startswith('검색') and len(args) > 1:
+            print('try to 검색', args[1])
+            self.replyAptData(chat_id, args[1], args[2])
+            # args[1] : 서울특별시
+            # args[2] : 강남구
+        elif text.startswith('즐겨찾기') and len(args) > 1:
+            if args[1] == '검색':
+                print('try to 즐겨찾기 검색', args[1])
+                self.replyAptData(chat_id, args[1])
+                # args[1] : 검색
+                # args[2] : None
+            elif args[1] == '추가':
+                print('try to 즐겨찾기 추가', args[1])
+                self.replyAptData(chat_id, args[1])
+                # args[1] : 검색
+                # args[2] : None
+        elif text.startswith('확인'):
+            print('try to 확인')
+            self.check(chat_id)
+        else:
+            Noti.sendMessage(chat_id, """모르는 명령어입니다.\n
+                    검색 [시/도] [시/군/구] \n
+                    즐겨찾기 [검색] \n
+                    즐겨찾기 [추가] \n
+                    확인 중 하나의 명령을 입력하세요.""")
+
+
+class telegram:
+    noti=Noti()
+    teller=Teller()
+    def __init__(self):
+        pass
+
+
 
 class framework:
     def __init__(self):
         self.window = Tk()
         self.window.geometry("400x600+750+200")
+
+        #텔레그램
+       # self.telegram = telegram()
+       # pprint(bot.getMe())
+        #telegram.noti.run()
 
         #프레임별로 요소들을 한번에 다룸. ex) destroy()
         self.mainFrame=[]
@@ -24,12 +189,13 @@ class framework:
 
         #self.InitMainFrame()
 
+        key = 'GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D'
         if not self.rowElements:
             for s in range(10):
                 s = str(s)
                 conn = http.client.HTTPConnection("apis.data.go.kr")
                 conn.request("GET",
-                             "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
+                             "/1741000/EarthquakeIndoors/getEarthquakeIndoorsList?serviceKey=" + key + "&pageNo=" + s + "&numOfRows=1000&type=xml&flag=Y")
                 req = conn.getresponse()
 
                 tree = ElementTree.fromstring(req.read())
@@ -67,7 +233,6 @@ class framework:
             self.canvas.create_rectangle(0,20+i*5+barWidth*i, 80+(int(self.canvas['width'])-100)*histogram[i]/maxCount,20+i*5+barWidth*(i+1),fill='light green')
             self.canvas.create_text(50,30+i*5+barWidth*i,text=cityNames[i],font=tmpFont)
             self.canvas.create_text(90+(int(self.canvas['width'])-100)*histogram[i]/maxCount,30+i*5+barWidth*i,text=histogram[i],font=tmpFont)
-            print(int(self.canvas['width'])*histogram[i]/maxCount)
 
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
         self.checkButton=Button(self.window, font=tmpFont, text="검    색", command=self.InitMainFrame)
@@ -240,7 +405,7 @@ class framework:
                                 "(4) 건물 담장과 떨어져 이동합니다\n"
                                 "(5) 넓은 공간으로 대피합니다\n")]
 
-        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont)
+        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont,command=self.SendMail)
         self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont,command=self.SetBookmark)
         self.backButton=Button(self.window,text="뒤로가기",font=tmpFont,command=self.Back)
 
@@ -271,3 +436,34 @@ class framework:
         self.driver.close()
 
         self.InitMainFrame()
+
+    def SendMail(self):
+        host = "smtp.gmail.com"  # Gmail STMP 서버 주소.
+        port = "587"
+        imgFile='screenshot.png'
+
+        senderAddr = "dswill038@gmail.com"  # 보내는 사람 email 주소.
+        recipientAddr = "dswill038@naver.com"  # 받는 사람 email 주소.
+
+        msg = MIMEBase("multipart", "mixed")
+        msg['Subject'] = "지진 대피소"  # 제목
+        msg['From'] = senderAddr
+        msg['To'] = recipientAddr
+
+        cont=MIMEText(self.address,'plain','UTF-8')
+        msg.attach(cont)
+
+        fp=open(imgFile,'rb')
+        img=MIMEImage(fp.read())
+        fp.close()
+        msg.attach(img)
+
+        # 메일을 발송한다.
+        s = mysmtplib.MySMTP(host, port)
+        # s.set_debuglevel(1)        # 디버깅이 필요할 경우 주석을 푼다.
+        s.ehlo()
+        s.starttls()
+        s.ehlo()
+        s.login("dswill038@gmail.com", "heeseok!23")
+        s.sendmail(senderAddr, [recipientAddr], msg.as_string())
+        s.close()

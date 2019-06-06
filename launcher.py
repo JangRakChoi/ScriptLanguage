@@ -1,2 +1,2 @@
 import tkFramework
-tkFramework.framework()
+launch = tkFramework.framework()
