@@ -236,13 +236,13 @@ class framework:
 
     def FindBookMark(self):
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
-        photo = PhotoImage(file="bookmarkscreenshot.png")
+        self.photo = PhotoImage(file="bookmarkscreenshot.png")
 
         for i in self.mainFrame:
             i.destroy()
         self.mainFrame=[]
 
-        self.label=[Label(self.window,image=photo,width=450,height=350),
+        self.label=[Label(self.window,image=self.photo,width=450,height=350),
                     Label(self.window,text=self.address),
                     Label(self.window,justify="left",
                           text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
@@ -288,13 +288,13 @@ class framework:
         self.driver.get("file:///C:/Users/CHS\Desktop/조희석/전공/스크립트언어/Team Project/ScriptLanguage/osm.html")
         self.driver.save_screenshot("screenshot.png")
 
-        photo=PhotoImage(file="screenshot.png")
+        self.photo=PhotoImage(file="screenshot.png")
         self.driver.close()
         for i in self.mainFrame:
             i.destroy()
         self.mainFrame=[]
 
-        self.label=[Label(self.window,image=photo,width=450,height=350),
+        self.label=[Label(self.window,image=self.photo,width=450,height=350),
                     Label(self.window,text=self.address),
                     Label(self.window,justify="left",
                           text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
