@@ -11,19 +11,7 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
-
-import sys
-import time
-import sqlite3
 import telepot
-from pprint import pprint
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-import re
-from datetime import date, datetime, timedelta
-import traceback
-
-import launcher
 
 CITY=0
 DISTRICT=1
@@ -31,143 +19,6 @@ DISTRICT=1
 TOKEN = '886975265:AAGNwVYRGIShdu4tf95OwRp6HHbwaMskYy4'
 MAX_MSG_LENGTH = 300
 bot = telepot.Bot(TOKEN)
-
-class Noti:
-    def __init__(self):
-        pass
-
-    def getData(self,command_param=None, subCommand_param=None):
-        elements = launcher.launch.rowElements
-        res_list = []
-        for i in elements:
-            if i.find("ctprvn_nm").text == command_param and i.find("sgg_nm").text == subCommand_param:
-                res_list.append(i.find("dtl_adres").text + i.find("mngps_nm").text + i.find("mngps_telno").text + '\n')
-
-        return res_list
-
-    def sendMessage(self,user, msg):
-        try:
-            bot.sendMessage(user, msg)
-        except:
-            traceback.print_exc(file=sys.stdout)
-
-    def run(self):
-        conn = sqlite3.connect('logs.db')
-        cursor = conn.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS logs( user TEXT, log TEXT, PRIMARY KEY(user, log) )')
-        conn.commit()
-
-        user_cursor = sqlite3.connect('users.db').cursor()
-        user_cursor.execute('CREATE TABLE IF NOT EXISTS users( user TEXT, location TEXT, PRIMARY KEY(user, location) )')
-        user_cursor.execute('SELECT * from users')
-
-        for data in user_cursor.fetchall():
-            user, param = data[0], data[1]
-            print(user, param)
-            res_list = self.getData(param)
-            msg = ''
-            for r in res_list:
-                try:
-                    cursor.execute('INSERT INTO logs (user,log) VALUES ("%s", "%s")' % (user, r))
-                except sqlite3.IntegrityError:
-                    # 이미 해당 데이터가 있다는 것을 의미합니다.
-                    pass
-                else:
-                    print(str(datetime.now()).split('.')[0], r)
-                    if len(r + msg) + 1 > MAX_MSG_LENGTH:
-                        self.sendMessage(user, msg)
-                        msg = r + '\n'
-                    else:
-                        msg += r + '\n'
-            if msg:
-                self.sendMessage(user, msg)
-        conn.commit()
-
-class Teller:
-    def __init__(self):
-        pass
-
-    def replyAptData(self,user, command_param, subCommand_param=None):
-        global MAX_MSG_LENGTH
-        print(user, command_param, subCommand_param)
-        res_list = Noti.getData(command_param, subCommand_param)
-        msg = ''
-        for r in res_list:
-            print(str(datetime.now()).split('.')[0], r)
-            if len(r + msg) + 1 > MAX_MSG_LENGTH:
-                Noti.sendMessage(user, msg)
-                msg = r + '\n'
-            else:
-                msg += r + '\n'
-        if msg:
-            Noti.sendMessage(user, msg)
-        else:
-            Noti.sendMessage(user, ' \데이터가 없습니다.')
-
-    def save(self,user, loc_param):
-        conn = sqlite3.connect('users.db')
-        cursor = conn.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS users( user TEXT, location TEXT, PRIMARY KEY(user, location) )')
-        try:
-            cursor.execute('INSERT INTO users(user, location) VALUES ("%s", "%s")' % (user, loc_param))
-        except sqlite3.IntegrityError:
-            Noti.sendMessage(user, '이미 해당 정보가 저장되어 있습니다.')
-            return
-        else:
-            Noti.sendMessage(user, '저장되었습니다.')
-            conn.commit()
-
-    def check(self,user):
-        conn = sqlite3.connect('users.db')
-        cursor = conn.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS users( user TEXT, location TEXT, PRIMARY KEY(user, location) )')
-        cursor.execute('SELECT * from users WHERE user="%s"' % user)
-        for data in cursor.fetchall():
-            row = 'id:' + str(data[0]) + ', location:' + data[1]
-            Noti.sendMessage(user, row)
-
-    def handle(self,msg):
-        content_type, chat_type, chat_id = telepot.glance(msg)
-        if content_type != 'text':
-            Noti.sendMessage(chat_id, '난 텍스트 이외의 메시지는 처리하지 못해요.')
-            return
-
-        text = msg['text']
-        args = text.split(' ')
-
-        if text.startswith('검색') and len(args) > 1:
-            print('try to 검색', args[1])
-            self.replyAptData(chat_id, args[1], args[2])
-            # args[1] : 서울특별시
-            # args[2] : 강남구
-        elif text.startswith('즐겨찾기') and len(args) > 1:
-            if args[1] == '검색':
-                print('try to 즐겨찾기 검색', args[1])
-                self.replyAptData(chat_id, args[1])
-                # args[1] : 검색
-                # args[2] : None
-            elif args[1] == '추가':
-                print('try to 즐겨찾기 추가', args[1])
-                self.replyAptData(chat_id, args[1])
-                # args[1] : 검색
-                # args[2] : None
-        elif text.startswith('확인'):
-            print('try to 확인')
-            self.check(chat_id)
-        else:
-            Noti.sendMessage(chat_id, """모르는 명령어입니다.\n
-                    검색 [시/도] [시/군/구] \n
-                    즐겨찾기 [검색] \n
-                    즐겨찾기 [추가] \n
-                    확인 중 하나의 명령을 입력하세요.""")
-
-
-class telegram:
-    noti=Noti()
-    teller=Teller()
-    def __init__(self):
-        pass
-
 
 
 class framework:
@@ -324,6 +175,15 @@ class framework:
         f.write(self.address)
         f.close()
 
+        map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=16)
+        folium.Marker([float(self.yPos), float(self.xPos)], popup='Mt. Hood Meadows').add_to(map_osm)
+        map_osm.save('osm.html')
+
+        self.driver = webdriver.Chrome()
+        self.driver.implicitly_wait(3)
+        self.driver.get("file:///C:/Users/CHS\Desktop/조희석/전공/스크립트언어/Team Project/ScriptLanguage/osm.html")
+        self.driver.save_screenshot("bookmarkscreenshot.png")
+
 
     def SearchShelters(self):
         #검색해서 찾은 것들을 리스트 박스에 넣는다
@@ -372,13 +232,53 @@ class framework:
         self.curBookmark=f.read()
         if self.curBookmark:
             self.address = self.curBookmark
-            self.FindLocation()
+            self.FindBookMark()
+
+    def FindBookMark(self):
+        tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
+        photo = PhotoImage(file="bookmarkscreenshot.png")
+
+        for i in self.mainFrame:
+            i.destroy()
+        self.mainFrame=[]
+
+        self.label=[Label(self.window,image=photo,width=450,height=350),
+                    Label(self.window,text=self.address),
+                    Label(self.window,justify="left",
+                          text="(1) 튼튼한 탁자 아래에 들어가 몸을 보호합니다\n"
+                                "(2) 가스, 전기를 차단하고 문을 열어 출구를 확보합니다\n"
+                                "(3) 계단을 이용하여 밖으로 대피합니다\n"
+                                "(4) 건물 담장과 떨어져 이동합니다\n"
+                                "(5) 넓은 공간으로 대피합니다\n")]
+
+        self.gmailButton=Button(self.window,text="Gmail",font=tmpFont,command=self.SendMail)
+        self.bookmarkButton=Button(self.window,text="즐겨찾기",font=tmpFont,command=self.SetBookmark)
+        self.backButton=Button(self.window,text="뒤로가기",font=tmpFont,command=self.Back)
+
+        for i in self.label:
+            i.pack()
+        self.gmailButton.pack()
+        self.bookmarkButton.pack()
+        self.backButton.pack()
+
+        self.label[0].place(x=0,y=50)
+        self.label[1].place(x=0,y=400)
+        self.label[2].place(x=0,y=450)
+        self.gmailButton.place(x=310,y=450)
+        self.bookmarkButton.place(x=310,y=480)
+        self.backButton.place(x=310,y=510)
+
+        for i in self.label:
+            self.resultFrame.append(i)
+        self.resultFrame.append(self.gmailButton)
+        self.resultFrame.append(self.bookmarkButton)
+        self.resultFrame.append(self.backButton)
 
     def FindLocation(self):
         tmpFont = font.Font(self.window, size=10, weight='bold', family='Consolas')
         # 이미지 연습중
 
-        #지도
+        # 지도
         map_osm = folium.Map(location=[float(self.yPos), float(self.xPos)], zoom_start=16)
         folium.Marker([float(self.yPos), float(self.xPos)], popup='Mt. Hood Meadows').add_to(map_osm)
         map_osm.save('osm.html')
@@ -387,11 +287,9 @@ class framework:
         self.driver.implicitly_wait(3)
         self.driver.get("file:///C:/Users/CHS\Desktop/조희석/전공/스크립트언어/Team Project/ScriptLanguage/osm.html")
         self.driver.save_screenshot("screenshot.png")
-        #driver.close()
 
         photo=PhotoImage(file="screenshot.png")
-
-        #address="a"
+        self.driver.close()
         for i in self.mainFrame:
             i.destroy()
         self.mainFrame=[]
@@ -433,7 +331,7 @@ class framework:
             i.destroy()
         self.resultFrame=[]
 
-        self.driver.close()
+        #self.driver.close()
 
         self.InitMainFrame()
 
@@ -467,3 +365,4 @@ class framework:
         s.login("dswill038@gmail.com", "heeseok!23")
         s.sendmail(senderAddr, [recipientAddr], msg.as_string())
         s.close()
+
