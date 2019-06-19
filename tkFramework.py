@@ -48,7 +48,7 @@ class framework:
 
         key = 'GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D'
         if not self.rowElements:
-            for s in range(50):
+            for s in range(2):
                 s = str(s)
                 conn = http.client.HTTPConnection("apis.data.go.kr")
                 conn.request("GET",
@@ -59,7 +59,7 @@ class framework:
                 self.rowElements = self.rowElements + list(tree.getiterator("row"))
 
         if not self.rowElementsIndoor:
-            for s in range(48):
+            for s in range(2):
                 s = str(s)
                 conn = http.client.HTTPConnection("apis.data.go.kr")
                 conn.request("GET",
@@ -434,9 +434,9 @@ class framework:
         self.driver = webdriver.Chrome()
         self.driver.implicitly_wait(3)
         self.driver.get("C:/Users\CHOI JANGRAK/Desktop/스언어\지진대피소/ScriptLanguage/osm.html")
-        self.driver.save_screenshot("bookmarkscreenshot.png")
+        self.driver.save_screenshot("screenshot.png.png")
 
-        self.photo=PhotoImage(file="bookmarkscreenshot.png")
+        self.photo=PhotoImage(file="screenshot.png.png")
         self.driver.close()
         for i in self.mainFrame:
             i.destroy()
@@ -490,7 +490,7 @@ class framework:
     def SendMail(self):
         host = "smtp.gmail.com"  # Gmail STMP 서버 주소.
         port = "587"
-        imgFile='bookmarkscreenshot.png'
+        imgFile='screenshot.png.png'
 
         senderAddr = "chlwkdfkr122@gmail.com"  # 보내는 사람 email 주소.
         recipientAddr = "bisu235@naver.com"  # 받는 사람 email 주소.
