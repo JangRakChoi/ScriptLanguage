@@ -41,13 +41,14 @@ class framework:
         self.rowElements=[]
         self.rowElementsIndoor = []
 
-
+        self.photo_smile = PhotoImage(file="woww.png")
+        self.photo_sad = PhotoImage(file="sad.png")
 
         #self.InitMainFrame()
 
         key = 'GPNYeB7snGIfFy9SjaOSs4RJlIn%2B4uAYYlq9ISmcNodo3AQX4uD6DS3M1%2FpXXHQ5IhR%2FUOewInIr%2F0WN4%2BdBdA%3D%3D'
         if not self.rowElements:
-            for s in range(5):
+            for s in range(50):
                 s = str(s)
                 conn = http.client.HTTPConnection("apis.data.go.kr")
                 conn.request("GET",
@@ -58,7 +59,7 @@ class framework:
                 self.rowElements = self.rowElements + list(tree.getiterator("row"))
 
         if not self.rowElementsIndoor:
-            for s in range(5):
+            for s in range(48):
                 s = str(s)
                 conn = http.client.HTTPConnection("apis.data.go.kr")
                 conn.request("GET",
@@ -376,33 +377,43 @@ class framework:
             i.destroy()
         self.resultFrame=[]
 
-       #self.photo_smile = PhotoImage(file="smile.png")
-        #self.photo_sad = PhotoImage(file="sad.png")
-
-        self.quiz_trueButton = Radiobutton(self.window, text="튼튼한 탁자 아래에 들어가 몸을 보호합니다", value=5, variable=self.radVar, relief="solid")
-        self.quiz_trueButton.pack()
-        self.quiz_trueButton.place(x=20, y=100)
-        self.quiz_falseButton = Radiobutton(self.window, text="좁은 공간으로 대피합니다", value=6, variable=self.radVar, relief="solid")
-        self.quiz_falseButton.pack()
-        self.quiz_falseButton.place(x=20, y=150)
+        self.quiz_trueButton1 = Button(self.window, text="튼튼한 탁자 아래에 들어가 몸을 보호합니다", command=self.Smile)
+        self.quiz_trueButton1.pack()
+        self.quiz_trueButton1.place(x=20, y=100)
+        self.quiz_falseButton1 = Button(self.window, text="좁은 공간으로 대피합니다", command=self.Sad)
+        self.quiz_falseButton1.pack()
+        self.quiz_falseButton1.place(x=20, y=130)
+        self.quiz_trueButton2 = Button(self.window, text="계단을 이용하여 밖으로 이동합니다.", command=self.Smile)
+        self.quiz_trueButton2.pack()
+        self.quiz_trueButton2.place(x=20, y=160)
+        self.quiz_falseButton2 = Button(self.window, text="건물 담장에 꼭 붙어 이동합니다.", command=self.Sad)
+        self.quiz_falseButton2.pack()
+        self.quiz_falseButton2.place(x=20, y=190)
 
         self.backButton_Quiz = Button(self.window, text="뒤로가기", font=tmpFont, command=self.Back_Quiz)
 
         self.backButton_Quiz.pack()
-        self.backButton.place(x=310, y=510)
-
-        #if self.radVar == 5:
-        #    self.label_quiz = Label(self.window,image=self.photo_smile,width=300,height=300)
-        #elif self.radVar == 6:
-        #    self.label_quiz = Label(self.window,image=self.photo_sad,width=300,height=300)
-
-        #self.label_quiz.pack()
-        #self.label_quiz.place(x=300, y=400)
+        self.backButton_Quiz.place(x=310, y=510)
 
         self.quizFrame.append(self.backButton_Quiz)
-        self.quizFrame.append(self.quiz_trueButton)
-        self.quizFrame.append(self.quiz_falseButton)
-        ##self.quizFrame.append(self.label_quiz)
+        self.quizFrame.append(self.quiz_trueButton1)
+        self.quizFrame.append(self.quiz_falseButton1)
+        self.quizFrame.append(self.quiz_trueButton2)
+        self.quizFrame.append(self.quiz_falseButton2)
+
+    def Sad(self):
+        self.label_quiz = Label(self.window, image=self.photo_sad, width=100, height=100)
+        self.label_quiz.pack()
+        self.label_quiz.place(x=200, y=330)
+
+        self.quizFrame.append(self.label_quiz)
+
+    def Smile(self):
+        self.label_quiz = Label(self.window, image=self.photo_smile, width=100, height=100)
+        self.label_quiz.pack()
+        self.label_quiz.place(x=200, y=330)
+
+        self.quizFrame.append(self.label_quiz)
 
     def Back_Quiz(self):
         for i in self.quizFrame:
